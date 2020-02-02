@@ -12,18 +12,19 @@ type Screen = {
   label: string
 }
 
+const screens: Screen[] = [
+  {
+    label: "TRACKPAD",
+    value: "PAD"
+  },
+  {
+    label: "KEYBOARD",
+    value: "KEY"
+  }
+]
+
 const Nav = ({ currentScreen, setCurrentScreen }: NavProps) => {
   const [open, setOpen] = useState(false)
-  const screens: Screen[] = [
-    {
-      label: "TRACKPAD",
-      value: "PAD"
-    },
-    {
-      label: "KEYBOARD",
-      value: "KEY"
-    }
-  ]
   const handlePressNav = () => {
     setOpen(!open)
   }
@@ -51,14 +52,12 @@ const Nav = ({ currentScreen, setCurrentScreen }: NavProps) => {
         )}
       </View>}
     </View>
-
-
   )
 }
 
 const styles = StyleSheet.create({
   navContainer: {
-    position: "relative",
+    position: "absolute",
     top: 15,
     left: 15,
   },

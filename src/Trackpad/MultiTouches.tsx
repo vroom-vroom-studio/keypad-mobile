@@ -1,17 +1,18 @@
 import React, { FunctionComponent } from 'react'
-import { View, PanResponder, GestureResponderEvent } from 'react-native'
+import { View, PanResponder, GestureResponderEvent, PanResponderGestureState } from 'react-native'
 // import { throttle, debounce } from 'throttle-debounce'
 
 interface MultiTouchesProps {
-  onLeftPress: (evt: GestureResponderEvent) => void;
-  onRightPress: (evt: GestureResponderEvent) => void;
-  onMove: (evt: GestureResponderEvent) => void;
-  onScroll: (evt: GestureResponderEvent) => void;
+  onLeftPress: (evt: GestureResponderEvent, gestureState: PanResponderGestureState) => void;
+  onRightPress: (evt: GestureResponderEvent, gestureState: PanResponderGestureState) => void;
+  onMove: (evt: GestureResponderEvent, gestureState: PanResponderGestureState) => void;
+  onScroll: (evt: GestureResponderEvent, gestureState: PanResponderGestureState) => void;
 }
 
 const MultiTouches: FunctionComponent<MultiTouchesProps> = ({ onLeftPress, onRightPress, onMove, onScroll, children }) => {
   let beginOfEvent = 0
   let numberOfTouches = 0
+  let lastEvent = 0
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: (evt, gestureState) => true,
     onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
@@ -28,10 +29,10 @@ const MultiTouches: FunctionComponent<MultiTouchesProps> = ({ onLeftPress, onRig
 
       switch (numberOfTouches) {
         case 1:
-          onMove(evt)
+          onMove(evt, gestureState)
           break;
         case 2:
-          onScroll(evt)
+          onScroll(evt, gestureState)
           break;
         default:
           return
@@ -41,13 +42,13 @@ const MultiTouches: FunctionComponent<MultiTouchesProps> = ({ onLeftPress, onRig
     onPanResponderTerminationRequest: (evt, gestureState) => true,
     onPanResponderRelease: (evt, gestureState) => {
       const timeSinceBegin = Date.now() - beginOfEvent
-      if (timeSinceBegin <= 150) {
+      if (timeSinceBegin <= 250) {
         switch (numberOfTouches) {
           case 1:
-            onLeftPress(evt)
+            onLeftPress(evt, gestureState)
             break;
           case 2:
-            onRightPress(evt)
+            onRightPress(evt, gestureState)
             break;
           default:
             return

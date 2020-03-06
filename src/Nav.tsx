@@ -1,48 +1,89 @@
-import React, { useState } from 'react'
+import React, { useState, useContext, Context } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { ScreensName } from './App'
-
-interface NavProps {
-  currentScreen: ScreensName,
-  setCurrentScreen: (screenName: ScreensName) => void
-}
-
+import { context, createStore, Action, Reducer } from './GlobalContext/GlobalContext1'
+import { IGlobalContext } from './App'
 type Screen = {
-  value: ScreensName,
+  value: ScreenNames,
   label: string
 }
 
-const screens: Screen[] = [
-  {
+export type ScreenNames = "PAD" | "KEY" | "SET"
+
+export interface NavState {
+  screen: Screen;
+  screens: Screen[];
+}
+
+const initilaState: NavState = {
+  screen: {
     label: "TRACKPAD",
     value: "PAD"
   },
-  {
-    label: "KEYBOARD",
-    value: "KEY"
-  }
-]
+  screens: [
+    {
+      label: "TRACKPAD",
+      value: "PAD"
+    },
+    {
+      label: "KEYBOARD",
+      value: "KEY"
+    },
+    {
+      label: "SETTINGS",
+      value: "SET"
+    }
+  ]
+}
 
-const Nav = ({ currentScreen, setCurrentScreen }: NavProps) => {
+interface SetScreenData {
+  type: 'SET_SCREEN',
+  screen: Screen
+}
+
+type NavActionData = SetScreenData
+
+export const setScreen = (screen: ScreenNames) => ({
+  type: 'SET_SCREEN',
+  data: {
+    screen
+  }
+})
+
+const reducer: Reducer<NavState, NavActionData> = (state, action) => {
+  const { type, data } = action
+  switch (type) {
+    case 'SET_SCREEN':
+      const { screen } = data
+      return { ...state, screen }
+    default:
+      return state
+  }
+}
+
+export const NavStore = createStore('nav', initilaState, reducer)
+
+const Nav = () => {
+  const { nav } = useContext<IGlobalContext>(context as Context<IGlobalContext>)
+  console.log(nav)
   const [open, setOpen] = useState(false)
   const handlePressNav = () => {
     setOpen(!open)
   }
-  const handlePressLink = (screenName: ScreensName) => () => {
-    setCurrentScreen(screenName)
-    setOpen(false)
+  const handlePressLink = (screenName: ScreenNames) => () => {
+    setScreen(screenName)
   }
+
   return (
     <View style={styles.navContainer}>
       <TouchableOpacity
         onPress={handlePressNav}
       >
         <View style={styles.navButton}>
-          <Text>{currentScreen}</Text>
+          <Text>{nav.screen.value}</Text>
         </View>
       </TouchableOpacity>
       {open && <View style={styles.navListContainer}>
-        {screens.map(({ label, value }) =>
+        {nav.screens.map(({ label, value }) =>
           <TouchableOpacity
             key={value}
             onPress={handlePressLink(value)}
@@ -71,6 +112,7 @@ const styles = StyleSheet.create({
     backgroundColor: "grey",
   },
   navListContainer: {
+    flexDirection: 'row',
     position: "absolute",
     top: 45,
     width: 75
